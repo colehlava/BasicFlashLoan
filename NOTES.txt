@@ -1,0 +1,37 @@
+# ================================================================================================================
+# BasicFlashLoan NOTES
+# ================================================================================================================
+
+
+# ================================================================================================================
+# Deployment Info
+# ================================================================================================================
+Deployer address: 0xa97AB312Ae36614016DC648ECF478Eaea3588d06
+deploying "BasicFlashLoan" (tx: 0x5bbb6d01db4992c8d88d96837e5d58995e77e688717238ee1b41e8b1f21b274b)...: deployed at 0xD34a64d1D5F661Da4EcC40ee6E1C75C7Ef0cCb6E with 761173 gas
+BasicFlashLoan deployed at: 0xD34a64d1D5F661Da4EcC40ee6E1C75C7Ef0cCb6E
+
+
+# ================================================================================================================
+# Commands
+# ================================================================================================================
+
+# Deploy the contract
+npx hardhat deploy --network sepolia
+
+# Get ETH balance
+cast balance $SEPOLIA_ADMIN --rpc-url $SEPOLIA_ENDPOINT 
+cast balance $BASICFLASHLOANCONTRACT --rpc-url $SEPOLIA_ENDPOINT
+
+# Get USDC balance
+BAL=$(cast call $SEPOLIA_USDC --private-key $SEPOLIA_PK "balanceOf(address)" $SEPOLIA_ADMIN --rpc-url $SEPOLIA_ENDPOINT | cast to-dec) && USDC_BALANCE=$(echo "scale=6; $BAL / 1000000" | bc) && echo $USDC_BALANCE
+BAL=$(cast call $SEPOLIA_USDC --private-key $SEPOLIA_PK "balanceOf(address)" $BASICFLASHLOANCONTRACT --rpc-url $SEPOLIA_ENDPOINT | cast to-dec) && USDC_BALANCE=$(echo "scale=6; $BAL / 1000000" | bc) && echo $USDC_BALANCE
+
+# Send ETH to contract
+cast send $BASICFLASHLOANCONTRACT --value 0.01ether --from $SEPOLIA_ADMIN --rpc-url $SEPOLIA_ENDPOINT --private-key $SEPOLIA_PK
+
+# Send USDC to contract
+cast send $SEPOLIA_USDC --private-key $SEPOLIA_PK "transfer(address,uint256)" $BASICFLASHLOANCONTRACT 100000000 --rpc-url $SEPOLIA_ENDPOINT
+
+# Execute flash loan
+cast send $BASICFLASHLOANCONTRACT --private-key $SEPOLIA_PK "executeFlashLoan(address,uint256)" $SEPOLIA_USDC 1000000 --rpc-url $SEPOLIA_ENDPOINT
+
